@@ -1,13 +1,15 @@
 @startuml
 
 package "release.yml" {
+  component [deno] as Deno
+  
   component [.pdb] as Pdb
   component [.dSYM] as Dsym
   component [.elf] as Elf
   component [symcache] as Symcache
 }
 
-cloud "gh releases" {
+cloud "gcs" {
 
 }
 
@@ -19,14 +21,17 @@ database "KV" {
   [address mapping]
 }
 
+
 Pdb -down-> Symcache
 Dsym -down-> Symcache
 Elf -down-> Symcache
-Symcache -down-> "gh releases"
+Symcache -down-> "gcs"
 
-"gh releases" .. symbolicate
-"/<version>/<trace_str>" -down-( symbolicate
+Deno -down-> symbolicate: "/version/trace"
+symbolicate -up-> "gcs"
 
-symbolicate -down- [address mapping]
+symbolicate .. [address mapping]
+
+note right of Deno: panik!!
 
 @enduml

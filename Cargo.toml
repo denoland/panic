@@ -5,7 +5,7 @@ repository = "https://github.com/denoland/panic"
 edition = "2021"
 
 [features]
-default = ["symbolicate"]
+default = []
 symbolicate = ["symbolic", "symbolic-demangle", "serde"]
 
 [dependencies]
