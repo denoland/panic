@@ -1,0 +1,9 @@
+{
+  "name": "@deno/panic",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": "./mod.ts",
+  "tasks": {
+    "wasmbuild": "deno run -A jsr:@deno/wasmbuild@0.19.1 --inline"
+  }
+}

@@ -1,0 +1,11 @@
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+deno_panic = { path = "../" }
+
+[profile.release]
+debug = true
+split-debuginfo = "packed"

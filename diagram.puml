@@ -1,0 +1,36 @@
+@startuml
+
+package "release.yml" {
+  component [deno] as Deno
+  
+  component [.pdb] as Pdb
+  component [.dSYM] as Dsym
+  component [.elf] as Elf
+  component [symcache] as Symcache
+}
+
+cloud "gcs" {
+
+}
+
+node "panic.deno.com" {
+  interface symbolicate
+}
+
+database "KV" {
+  [address mapping]
+}
+
+Pdb -down-> Symcache
+Dsym -down-> Symcache
+Elf -down-> Symcache
+Symcache -down-> "gcs"
+
+Deno -down-> symbolicate: "/version/trace"
+symbolicate -up-> "gcs"
+
+symbolicate .. [address mapping]
+
+note right of Deno: panik!!
+
+@enduml
