@@ -1,0 +1,32 @@
+@startuml
+
+package "release.yml" {
+  component [.pdb] as Pdb
+  component [.dSYM] as Dsym
+  component [.elf] as Elf
+  component [symcache] as Symcache
+}
+
+cloud "gh releases" {
+
+}
+
+node "panic.deno.com" {
+  interface symbolicate
+}
+
+database "KV" {
+  [address mapping]
+}
+
+Pdb -down-> Symcache
+Dsym -down-> Symcache
+Elf -down-> Symcache
+Symcache -down-> "gh releases"
+
+"gh releases" .. symbolicate
+"/<version>/<trace_str>" -down-( symbolicate
+
+symbolicate -down- [address mapping]
+
+@enduml
