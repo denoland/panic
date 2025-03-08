@@ -1,0 +1,17 @@
+[package]
+name = "deno_panic"
+version = "0.1.0"
+repository = "https://github.com/denoland/panic"
+edition = "2021"
+
+[features]
+default = ["symbolicate"]
+symbolicate = ["symbolic", "symbolic-demangle", "serde"]
+
+[dependencies]
+symbolic = { version = "12.13.3", features = ["debuginfo", "symcache"], optional = true }
+symbolic-demangle = { version = "12.13.3", features = [
+  "rust",
+], default-features = false, optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+anyhow = "1.0"
