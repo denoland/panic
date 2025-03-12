@@ -35,9 +35,55 @@ struct SegmentCommand64 {
 }
 
 #[cfg(target_os = "macos")]
-unsafe fn dyn_slide() -> usize {
+unsafe fn dyn_slide(addr: u64) -> usize {
     let cmd = getsegbyname(c"__TEXT".as_ptr() as _);
-    _dyld_get_image_vmaddr_slide(0) + (&*cmd).vmaddr as usize
+    addr - (_dyld_get_image_vmaddr_slide(0) + (&*cmd).vmaddr as usize)
+}
+
+#[cfg(target_os = "linux")]
+unsafe fn dyn_slide(addr: u64) -> u64 {
+    use std::ffi::{c_int, c_void};
+
+    struct Data {
+        addr: u64,
+        out: Option<u64>,
+    }
+
+    let mut data = Data { addr, out: None };
+
+    unsafe extern "C" fn callback(
+        info: *mut libc::dl_phdr_info,
+        _size: usize,
+        data: *mut c_void,
+    ) -> c_int {
+        let dlpi_addr = unsafe { *info }.dlpi_addr;
+        let data = data.cast::<Data>();
+        let addr = unsafe { (*data).addr };
+        if addr < dlpi_addr {
+            return 0;
+        }
+        let mut current = unsafe { (*info).dlpi_phdr };
+        let end = current.add(unsafe { (*info).dlpi_phnum } as usize);
+        while current < end {
+            if unsafe { (*current).p_type != libc::PT_LOAD } {
+                current = current.add(1);
+                continue;
+            }
+
+            let segment_start = dlpi_addr.wrapping_add((*current).p_vaddr);
+            let segment_end = segment_start + (*current).p_memsz;
+            if addr >= segment_start && addr < segment_end {
+                (*data).out = Some(addr.saturating_sub(dlpi_addr));
+                return 1;
+            }
+            current = current.add(1);
+        }
+        0
+    }
+
+    unsafe { libc::dl_iterate_phdr(Some(callback), (&mut data) as *mut _ as _) };
+
+    data.out.unwrap_or(0)
 }
 
 pub fn trace() -> String {
@@ -49,7 +95,7 @@ pub fn trace() -> String {
         #[cfg(not(target_os = "macos"))]
         let ip = _Unwind_FindEnclosingFunction(ip as *mut c_void) as usize;
 
-        let stack_addr = ip - dyn_slide();
+        let stack_addr = dyn_slide(ip as u64);
 
         let encoded = &mut *(arg as *mut Vec<u8>);
         vlq_encode(stack_addr as i32, encoded);
