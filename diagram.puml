@@ -21,7 +21,6 @@ database "KV" {
   [address mapping]
 }
 
-
 Pdb -down-> Symcache
 Dsym -down-> Symcache
 Elf -down-> Symcache
