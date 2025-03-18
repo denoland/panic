@@ -37,7 +37,7 @@ struct SegmentCommand64 {
 #[cfg(target_os = "macos")]
 unsafe fn dyn_slide(addr: u64) -> usize {
     let cmd = getsegbyname(c"__TEXT".as_ptr() as _);
-    addr - (_dyld_get_image_vmaddr_slide(0) + (&*cmd).vmaddr as usize)
+    addr as usize - (_dyld_get_image_vmaddr_slide(0) + (&*cmd).vmaddr as usize)
 }
 
 #[cfg(target_os = "linux")]
