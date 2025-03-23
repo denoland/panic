@@ -9,8 +9,7 @@ export default function Home() {
       <div class="p-4">
         <p class="text-gray-700 mb-4">
           This tool converts URL-safe panic traces from Deno into readable stack
-          traces. Just paste in a trace string, and it’ll symbolicate it for
-          you.
+          traces. Just click on the trace URL, and it’ll symbolicate it for you.
         </p>
         <p class="text-gray-700 mb-4">
           Check out an{" "}
@@ -28,8 +27,8 @@ export default function Home() {
         <p class="text-gray-700">
           Panics in Deno are rare—but when they happen, understanding them is
           crucial. Including debug info directly in binaries makes them bulky.
-          This tool lets you symbolicate traces remotely, so you can keep your
-          binaries slim without losing observability.
+          This tool lets users symbolicate traces remotely, so Deno ship small
+          binaries without losing observability.
         </p>
       </div>
     </div>
