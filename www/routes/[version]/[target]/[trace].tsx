@@ -214,11 +214,7 @@ export default function GreetPage(props: PageProps) {
 
   return (
     <main>
-      <div class="min-h-screen bg-gray-50">
-        <div class="max-w-3xl mx-auto px-4 py-4">
-          <Stacktrace trace={trace} ghUrl={ghUrl} />
-        </div>
-      </div>
+      <Stacktrace trace={trace} ghUrl={ghUrl} />
     </main>
   );
 }
