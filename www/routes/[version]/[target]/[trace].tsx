@@ -181,16 +181,23 @@ export const handler: Handlers = {
   async GET(req, ctx) {
     const { version, target, trace: trace_str } = ctx.params;
 
-    const res = await kv.get([version, target, trace_str]);
+    const key = [version, target, trace_str];
+
+    const res = await kv.get(["trace", ...key]);
     let trace;
 
     if (res.value) {
       trace = res.value;
+      await kv.atomic().sum(["metric", ...key], 1n).commit();
     } else {
       const symcache = await getSymcache(version, target);
       trace = symbolicate(trace_str, symcache);
 
-      await kv.set([version, target, trace_str], trace);
+      await kv
+        .atomic()
+        .set(["trace", ...key], trace)
+        .sum(["metric", ...key], 1n)
+        .commit();
     }
 
     const ghUrl = createGithubIssueUrl(
