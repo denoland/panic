@@ -165,18 +165,32 @@ function Stacktrace({ trace, ghUrl }: { trace: Trace; ghUrl: string }) {
   );
 }
 
+async function cachedFetch(url: string) {
+  const cached = await cache.match(url);
+  if (cached) return cached;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    return res;
+  }
+
+  await cache.put(url, res.clone());
+  return res;
+}
+
+const cache = await caches.open("symcache");
+
 async function getSymcache(version, target) {
   if (Deno.env.get("DENO_SYMCACHE")) {
     return Deno.readFileSync(Deno.env.get("DENO_SYMCACHE"));
   }
-
   let type = "release";
   if (version.includes("+")) {
     const [v, hash] = version.split("+");
     type = "canary";
 
     // Resolve the full sha from the short hash
-    const res = await fetch(
+    const res = await cachedFetch(
       `https://api.github.com/repos/denoland/deno/commits/${hash}`,
     );
     if (!res.ok) {
@@ -189,7 +203,7 @@ async function getSymcache(version, target) {
 
   const url =
     `https://storage.googleapis.com/dl.deno.land/${type}/${version}/deno-${target}.symcache`;
-  const zip = await fetch(url);
+  const zip = await cachedFetch(url);
 
   if (zip.status === 404) {
     throw new Error("Debug info not found");
