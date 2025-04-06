@@ -170,9 +170,34 @@ async function getSymcache(version, target) {
     return Deno.readFileSync(Deno.env.get("DENO_SYMCACHE"));
   }
 
+  let type = "release";
+  if (version.includes("+")) {
+    const [v, hash] = version.split("+");
+    type = "canary";
+
+    // Resolve the full sha from the short hash
+    const res = await fetch(
+      `https://api.github.com/repos/denoland/deno/commits/${hash}`,
+    );
+    if (!res.ok) {
+      throw new Error("Failed to fetch commit");
+    }
+
+    const sha = await res.json();
+    version = sha.sha;
+  }
+
   const url =
-    `https://storage.googleapis.com/dl.deno.land/release/${version}/deno-${target}.symcache`;
+    `https://storage.googleapis.com/dl.deno.land/${type}/${version}/deno-${target}.symcache`;
   const zip = await fetch(url);
+
+  if (zip.status === 404) {
+    throw new Error("Debug info not found");
+  }
+
+  if (!zip.ok) {
+    throw new Error("Failed to fetch debug info");
+  }
 
   return new Uint8Array(await zip.arrayBuffer());
 }
@@ -190,14 +215,20 @@ export const handler: Handlers = {
       trace = res.value;
       await kv.atomic().sum(["metric", ...key], 1n).commit();
     } else {
-      const symcache = await getSymcache(version, target);
-      trace = symbolicate(trace_str, symcache);
+      try {
+        const symcache = await getSymcache(version, target);
 
-      await kv
-        .atomic()
-        .set(["trace", ...key], trace)
-        .sum(["metric", ...key], 1n)
-        .commit();
+        trace = symbolicate(trace_str, symcache);
+
+        await kv
+          .atomic()
+          .set(["trace", ...key], trace)
+          .sum(["metric", ...key], 1n)
+          .commit();
+      } catch (e) {
+        console.error(e);
+        return Response.json(e.message, { status: 500 });
+      }
     }
 
     const ghUrl = createGithubIssueUrl(

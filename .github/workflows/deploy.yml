@@ -32,5 +32,3 @@ jobs:
           project: "panic"
           entrypoint: "www/main.ts"
           root: "."
-          
-          
