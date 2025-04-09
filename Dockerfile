@@ -9,7 +9,7 @@ WORKDIR /app/www
 RUN deno task build
 
 # Warmup caches
-RUN timeout 2s deno run -A --cached-only www/main.ts || true
+RUN timeout 2s deno run -A --cached-only main.ts || true
 
-CMD ["run", "-A", "--cached-only", "www/main.ts"]
+CMD ["run", "-A", "--cached-only", "main.ts"]
 
