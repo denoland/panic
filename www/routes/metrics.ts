@@ -1,6 +1,6 @@
 import { Handlers } from "$fresh/server.ts";
 
-const kv = await Deno.openKv();
+const kv = await Deno.openKv(Deno.env.get("DENO_KV_DATABASE_URL"));
 
 export const handler: Handlers = {
   async GET() {
