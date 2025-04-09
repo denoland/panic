@@ -1,8 +1,8 @@
-import { Handler, PageProps } from "$fresh/server.ts";
+import { Handlers, PageProps } from "$fresh/server.ts";
 
 import { symbolicate } from "../../../../wasm/lib/rs_lib.js";
 
-const kv = await Deno.openKv();
+const kv = await Deno.openKv(Deno.env.get("DENO_KV_DATABASE_URL"));
 
 type Trace = {
   demangledName: string;
@@ -14,8 +14,8 @@ type Trace = {
 
 function formatStackTraceMarkdown(trace: Trace): string {
   let markdown = "stack backtrace:\n";
-  trace.forEach((frame, frameIndex) => {
-    frame.forEach((f, index) => {
+  trace.forEach((frame) => {
+    frame.forEach((f) => {
       const githubLink = getGithubLink(f.fullPath, f.line);
 
       if (githubLink) {
@@ -32,7 +32,6 @@ function createGithubIssueUrl(
   trace: Trace,
   version: string,
   target: string,
-  trace_str: string,
   url: string,
 ): string {
   const body = encodeURIComponent(
@@ -180,13 +179,13 @@ async function cachedFetch(url: string) {
 
 const cache = await caches.open("symcache");
 
-async function getSymcache(version, target) {
+async function getSymcache(version: string, target: string) {
   if (Deno.env.get("DENO_SYMCACHE")) {
-    return Deno.readFileSync(Deno.env.get("DENO_SYMCACHE"));
+    return Deno.readFileSync(Deno.env.get("DENO_SYMCACHE")!);
   }
   let type = "release";
   if (version.includes("+")) {
-    const [v, hash] = version.split("+");
+    const [_, hash] = version.split("+");
     type = "canary";
 
     // Resolve the full sha from the short hash
@@ -213,7 +212,7 @@ async function getSymcache(version, target) {
     throw new Error("Failed to fetch debug info");
   }
 
-  return new Uint8Array(await zip.arrayBuffer());
+  return await zip.bytes();
 }
 
 export const handler: Handlers = {
@@ -241,7 +240,7 @@ export const handler: Handlers = {
           .commit();
       } catch (e) {
         console.error(e);
-        return Response.json(e.message, { status: 500 });
+        return new Response((e as Error).message, { status: 500 });
       }
     }
 
@@ -249,7 +248,6 @@ export const handler: Handlers = {
       trace,
       version,
       target,
-      trace_str,
       req.url,
     );
 
