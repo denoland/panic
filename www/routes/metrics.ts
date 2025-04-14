@@ -13,9 +13,11 @@ export const handler: Handlers = {
         target: entry.key[2],
         trace: entry.key[3],
         count: Number(entry.value),
+        url: `http://panic.deno.com/${String(entry.key[1])}/${String(entry.key[2])}/${String(entry.key[3])}`
       });
     }
 
+    traces.sort((a, b) => b.count - a.count);
     return Response.json(traces);
   },
 };
