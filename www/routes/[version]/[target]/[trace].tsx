@@ -219,6 +219,8 @@ export const handler: Handlers = {
   async GET(req, ctx) {
     const { version, target, trace: trace_str } = ctx.params;
 
+    const preview = !!(new URL(req.url)).searchParams.get("preview");
+
     const key = [version, target, trace_str];
 
     const res = await kv.get(["trace", ...key]);
@@ -226,7 +228,10 @@ export const handler: Handlers = {
 
     if (res.value) {
       trace = res.value;
-      await kv.atomic().sum(["metric", ...key], 1n).commit();
+      if (!preview) {
+        // Increment the metric if not in preview mode
+        await kv.atomic().sum(["metric", ...key], 1n).commit();
+      }
     } else {
       try {
         const symcache = await getSymcache(version, target);
