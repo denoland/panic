@@ -253,7 +253,7 @@ export const handler: Handlers = {
       trace,
       version,
       target,
-      req.url,
+      req.url + preview ? "?preview" : "",
     );
 
     const resp = await ctx.render({
