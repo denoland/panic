@@ -35,11 +35,30 @@ export default function DashboardMetrics() {
     fetchMetrics();
   }, []);
 
-  // Get unique versions and targets for filter dropdowns
-  const versions = [...new Set(metrics.map((m) => m.version))];
+  const versions = [...new Set(metrics.map((m) => m.version))].sort((a, b) => {
+    // Handle canary versions (vx.x.x+<sha>)
+    const aIsCanary = a.includes("+");
+    const bIsCanary = b.includes("+");
+
+    if (aIsCanary && !bIsCanary) return 1;
+    if (!aIsCanary && bIsCanary) return -1;
+
+    const aParts = a.replace(/^v/, "").split(/[.\-+]/);
+    const bParts = b.replace(/^v/, "").split(/[.\-+]/);
+
+    for (let i = 0; i < Math.min(aParts.length, bParts.length); i++) {
+      const aNum = parseInt(aParts[i], 10);
+      const bNum = parseInt(bParts[i], 10);
+
+      if (!isNaN(aNum) && !isNaN(bNum) && aNum !== bNum) {
+        return bNum - aNum; // Descending order (latest first)
+      }
+    }
+
+    return bParts.length - aParts.length;
+  });
   const targets = [...new Set(metrics.map((m) => m.target))];
 
-  // Filter metrics based on user input
   const filteredMetrics = metrics.filter((metric) => {
     const matchesText = filter === "" ||
       metric.trace.toLowerCase().includes(filter.toLowerCase()) ||
@@ -80,7 +99,11 @@ export default function DashboardMetrics() {
           >
             <option value="">All Versions</option>
             {versions.map((version) => (
-              <option key={version} value={version}>{version}</option>
+              <option key={version} value={version} title={version}>
+                {version.length > 15
+                  ? `${version.substring(0, 12)}...`
+                  : version}
+              </option>
             ))}
           </select>
         </div>
@@ -194,7 +217,11 @@ export default function DashboardMetrics() {
                           {metric.count}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {metric.version}
+                          <span title={metric.version} class="cursor-default">
+                            {metric.version.length > 15
+                              ? `${metric.version.substring(0, 12)}...`
+                              : metric.version}
+                          </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {metric.target}
