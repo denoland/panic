@@ -10,7 +10,7 @@ export default function App({ Component }: PageProps) {
       </head>
       <body>
         <div class="min-h-screen bg-gray-50">
-          <div class="max-w-3xl mx-auto px-4 py-4">
+          <div class="mx-auto px-4 py-4 max-w-6xl">
             <Component />
           </div>
         </div>
