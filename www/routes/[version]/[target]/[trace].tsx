@@ -218,15 +218,17 @@ async function getSymcache(version: string, target: string) {
 export const handler: Handlers = {
   async GET(req, ctx) {
     const { version, target, trace: trace_str } = ctx.params;
+    const url = new URL(req.url);
 
-    const preview = !!(new URL(req.url)).searchParams.get("preview");
+    const preview = !!url.searchParams.get("preview");
+    const cache = url.searchParams.get("cache") !== "0";
 
     const key = [version, target, trace_str];
 
     const res = await kv.get(["trace", ...key]);
     let trace;
 
-    if (res.value) {
+    if (res.value && cache) {
       trace = res.value;
       if (!preview) {
         // Increment the metric if not in preview mode
