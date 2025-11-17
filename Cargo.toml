@@ -12,9 +12,7 @@ symbolicate = ["symbolic", "symbolic-demangle", "serde", "anyhow"]
 
 [dependencies]
 symbolic = { version = "12.13.3", features = ["debuginfo", "symcache"], optional = true }
-symbolic-demangle = { version = "12.13.3", features = [
-  "rust",
-], default-features = false, optional = true }
+symbolic-demangle = { version = "12.13.3", features = ["rust", "cpp", "msvc"], default-features = false, optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 anyhow = { version = "1.0", optional = true }
 libc = "0.2"
