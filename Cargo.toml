@@ -1,6 +1,6 @@
 [package]
 name = "deno_panic"
-version = "0.1.0"
+version = "0.2.0"
 repository = "https://github.com/denoland/panic"
 description = "stack trace and symbolication for deno"
 license = "MIT"
