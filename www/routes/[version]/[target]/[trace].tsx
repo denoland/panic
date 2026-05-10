@@ -201,7 +201,7 @@ async function getSymcache(version: string, target: string) {
   }
 
   const url =
-    `https://storage.googleapis.com/dl.deno.land/${type}/${version}/deno-${target}.symcache`;
+    `https://dl.deno.land/${type}/${version}/deno-${target}.symcache`;
   const zip = await cachedFetch(url);
 
   if (zip.status === 404) {
