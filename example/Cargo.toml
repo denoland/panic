@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-deno_panic = { path = "../" }
+deno_panic = { path = "../", features = ["frame-pointer"] }
 
 [profile.release]
 debug = true
