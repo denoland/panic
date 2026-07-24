@@ -4,7 +4,10 @@ version = 4
 
 [[package]]
 name = "deno_panic"
-version = "0.1.0"
+version = "0.2.1"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "example"
@@ -12,3 +15,9 @@ version = "0.1.0"
 dependencies = [
  "deno_panic",
 ]
+
+[[package]]
+name = "libc"
+version = "0.2.170"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "875b3680cb2f8f71bdcf9a30f38d48282f5d3c95cbf9b3fa57269bb5d5c06828"

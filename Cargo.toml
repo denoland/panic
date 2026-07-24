@@ -1,6 +1,6 @@
 [package]
 name = "deno_panic"
-version = "0.2.0"
+version = "0.2.1"
 repository = "https://github.com/denoland/panic"
 description = "stack trace and symbolication for deno"
 license = "MIT"
@@ -8,6 +8,7 @@ edition = "2021"
 
 [features]
 default = []
+frame-pointer = []
 symbolicate = ["symbolic", "symbolic-demangle", "serde", "anyhow"]
 
 [dependencies]
