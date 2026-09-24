@@ -28,3 +28,17 @@ pointers. Compile Rust code with `-Cforce-frame-pointers=yes` and rebuild the
 standard library with the same flag (for example, with Cargo's `-Zbuild-std`).
 Native code on the call path must likewise preserve frame pointers. Link with
 `--no-eh-frame-hdr` before removing the unwind sections from the final ELF.
+
+## Deployment
+
+`panic.deno.com` runs on Cloud Run (project `panic-deno-com`, service `panic`,
+region `us-central1`), built from the `Dockerfile` in this repo. A Cloud Build
+trigger rebuilds and redeploys on every push to `main`; there is no GitHub
+Actions deploy step.
+
+Symbolicated traces and hit counters are stored in Deno KV. The database is
+owned by the `panic-kv` app in the `deno` Deno Deploy org — that app only
+exists to hold the database, since a KV database has to be attached to an app.
+Do not delete it. The service reads `DENO_KV_DATABASE_URL` (the database's
+connect URL) and `DENO_KV_ACCESS_TOKEN` (a Deploy token, from Secret Manager
+secret `deno_kv_access_token`).

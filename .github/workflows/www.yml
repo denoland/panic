@@ -1,4 +1,5 @@
-name: Deploy
+name: www
+
 on:
   push:
     branches: main
@@ -6,13 +7,9 @@ on:
     branches: main
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write # Needed for auth with Deno Deploy
-      contents: read # Needed to clone the repository
 
     steps:
       - name: Clone repository
@@ -25,10 +22,3 @@ jobs:
 
       - name: Build step
         run: "cd www && deno task build"
-
-      - name: Upload to Deno Deploy
-        uses: denoland/deployctl@v1
-        with:
-          project: "panic"
-          entrypoint: "www/main.ts"
-          root: "."
